@@ -1,15 +1,178 @@
+<!--
+  =============================================================
+  2026 Subaru Outback — Landing Page
+  =============================================================
+  Single-file marketing page (HTML + CSS + JS, no build step).
+  Dev server: npm run dev  →  http://localhost:8000
+
+  PAGE STRUCTURE
+  ──────────────
+  <head>
+    Google Fonts (Inter + Inter Tight)
+    <style>  CSS custom properties, all component styles
+  <body>
+    .video-bg          Fixed full-screen background video
+                       Collapses to a 288×162 corner card on scroll
+    .video-frame       White border shown around the collapsed card
+    .video-close       Button to dismiss the collapsed card
+    <nav>              Fixed top navigation with scroll-frost effect
+    .hero              Full-viewport hero; text fades/lifts on scroll
+    .content-wrap      All post-hero sections
+      .overview        4-stat metrics strip
+      .intro-grid      2-col split: copy + vehicle silhouette SVG
+      #trims           3-column trim / pricing cards
+      #specs           Performance numbers grid
+      #safety          EyeSight driver-assist features
+      #cta             Full-width call-to-action banner
+      <footer>         Brand + nav links + legal
+    <script>           Scroll handler, reveal observer, smooth scroll
+
+  Z-INDEX LAYERS
+  ──────────────
+    0    .video-bg (full-screen, behind everything)
+    1    .hero, .content-wrap
+    79   .video-frame (border frame for collapsed card)
+    80   .video-bg.collapsed (card mode, needs pointer events)
+    82   .video-close (above the card frame)
+    100  <nav> (always on top)
+
+  DESIGN TOKENS  →  see :root in <style>
+  SCROLL LOGIC   →  see onScroll() in <script>
+  REVEAL ANIMS   →  .reveal / IntersectionObserver in <script>
+  =============================================================
+-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>2026 Subaru Outback — 30 Years of Evolution</title>
+
+  <!-- ── Primary SEO ── -->
+  <meta name="description" content="The 2026 Subaru Outback — 30 years of refinement. Standard Symmetrical AWD, EyeSight® Driver Assist, 8.7&quot; ground clearance, and up to 33 MPG highway. Starting from $29,710 MSRP." />
+  <meta name="robots" content="index, follow" />
+  <!--
+    Replace the canonical href with the live URL once the page is deployed.
+    This prevents duplicate-content penalties if the page is served at
+    multiple URLs (e.g. with/without trailing slash, www vs. non-www).
+  -->
+  <link rel="canonical" href="https://www.subaru.ca/en/vehicles/outback/2026/" />
+
+  <!-- ── Favicon ── -->
+  <!--
+    Replace with real .ico / .png assets at the root of the deployed site.
+    Browsers fall back gracefully if these are missing during development.
+  -->
+  <link rel="icon"             type="image/x-icon"  href="/favicon.ico" />
+  <link rel="apple-touch-icon" sizes="180x180"       href="/apple-touch-icon.png" />
+
+  <!-- ── Open Graph (Facebook · LinkedIn · general social previews) ── -->
+  <meta property="og:type"        content="website" />
+  <meta property="og:site_name"   content="Subaru Canada" />
+  <meta property="og:locale"      content="en_CA" />
+  <meta property="og:url"         content="https://www.subaru.ca/en/vehicles/outback/2026/" />
+  <meta property="og:title"       content="2026 Subaru Outback — 30 Years of Evolution" />
+  <meta property="og:description" content="Standard Symmetrical AWD, EyeSight® Driver Assist, and 8.7&quot; ground clearance. The 2026 Outback starts from $29,710 MSRP." />
+  <!--
+    og:image must be an absolute URL to a 1200×630 px image on the live server.
+    Replace the placeholder below with the actual hero / product shot.
+  -->
+  <meta property="og:image"       content="https://www.subaru.ca/assets/images/2026-outback-og.jpg" />
+  <meta property="og:image:width"  content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt"   content="2026 Subaru Outback in Wilderness trim on a mountain road" />
+
+  <!-- ── Twitter / X Card ── -->
+  <meta name="twitter:card"        content="summary_large_image" />
+  <meta name="twitter:site"        content="@SubaruCanada" />
+  <meta name="twitter:title"       content="2026 Subaru Outback — 30 Years of Evolution" />
+  <meta name="twitter:description" content="Standard Symmetrical AWD, EyeSight® Driver Assist, and 8.7&quot; ground clearance. Starting from $29,710 MSRP." />
+  <meta name="twitter:image"       content="https://www.subaru.ca/assets/images/2026-outback-og.jpg" />
+  <meta name="twitter:image:alt"   content="2026 Subaru Outback in Wilderness trim on a mountain road" />
+
+  <!-- ── Structured Data (JSON-LD) ── -->
+  <!--
+    Schema.org Product + Car markup helps search engines display rich results
+    (price, availability, vehicle details) directly in the SERP.
+    Update offers[].url values with real configurator / dealer-search links.
+  -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Car",
+    "name": "2026 Subaru Outback",
+    "description": "The 2026 Subaru Outback combines standard Symmetrical AWD, EyeSight® Driver Assist Technology, and best-in-class 8.7-inch ground clearance for confident driving in every condition.",
+    "brand": {
+      "@type": "Brand",
+      "name": "Subaru",
+      "url": "https://www.subaru.ca"
+    },
+    "model": "Outback",
+    "vehicleModelDate": "2026",
+    "driveWheelConfiguration": "https://schema.org/AllWheelDriveConfiguration",
+    "fuelType": "Gasoline",
+    "vehicleEngine": {
+      "@type": "EngineSpecification",
+      "name": "2.5L SUBARU BOXER",
+      "enginePower": {
+        "@type": "QuantitativeValue",
+        "value": 182,
+        "unitCode": "HEP"
+      },
+      "torque": {
+        "@type": "QuantitativeValue",
+        "value": 176,
+        "unitCode": "F17"
+      }
+    },
+    "fuelEfficiency": {
+      "@type": "QuantitativeValue",
+      "value": 33,
+      "unitText": "MPG highway"
+    },
+    "url": "https://www.subaru.ca/en/vehicles/outback/2026/",
+    "image": "https://www.subaru.ca/assets/images/2026-outback-og.jpg",
+    "offers": [
+      {
+        "@type": "Offer",
+        "name": "2026 Subaru Outback Base",
+        "price": "29710",
+        "priceCurrency": "CAD",
+        "availability": "https://schema.org/InStock",
+        "url": "https://www.subaru.ca/en/vehicles/outback/2026/"
+      },
+      {
+        "@type": "Offer",
+        "name": "2026 Subaru Outback Onyx Edition XT",
+        "price": "38470",
+        "priceCurrency": "CAD",
+        "availability": "https://schema.org/InStock",
+        "url": "https://www.subaru.ca/en/vehicles/outback/2026/"
+      },
+      {
+        "@type": "Offer",
+        "name": "2026 Subaru Outback Wilderness",
+        "price": "40295",
+        "priceCurrency": "CAD",
+        "availability": "https://schema.org/InStock",
+        "url": "https://www.subaru.ca/en/vehicles/outback/2026/"
+      }
+    ]
+  }
+  </script>
+
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Inter+Tight:wght@700;800;900&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+    /* ─────────────────────────────────────────
+       DESIGN TOKENS
+       All colours, spacing, and sizing values
+       are defined here. Reference these tokens
+       everywhere — never hard-code raw values.
+    ───────────────────────────────────────── */
     :root {
       --bg:       #080808;
       --surface:  #111111;
@@ -560,6 +723,18 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
+    /* Visually hidden but readable by screen readers and search engines.
+       Use to provide keyword-rich text that would otherwise break the visual design. */
+    .sr-only {
+      position: absolute;
+      width: 1px; height: 1px;
+      padding: 0; margin: -1px;
+      overflow: hidden;
+      clip: rect(0,0,0,0);
+      white-space: nowrap;
+      border: 0;
+    }
+
     /* ─────────────────────────────────────────
        HERO SCROLL ANIMATION
     ───────────────────────────────────────── */
@@ -589,7 +764,7 @@
   <!-- ░░ NAV ░░ -->
   <nav id="nav">
     <a href="#" class="nav-logo">
-      <img src="Subaru-logo.avif" alt="Subaru" />
+      <img src="Subaru-logo.avif" alt="Subaru Canada" />
     </a>
     <ul class="nav-links">
       <li><a href="#hero">Outback</a></li>
@@ -605,7 +780,7 @@
     <div class="hero-overlay"></div>
     <div class="hero-content" id="heroContent">
       <p class="hero-eyebrow">2026 Model Year</p>
-      <h1 class="hero-title">30 Years of<br/>Evolution.</h1>
+      <h1 class="hero-title"><span class="sr-only">2026 Subaru Outback — </span>30 Years of<br/>Evolution.</h1>
       <p class="hero-sub">Since 1994, the Subaru Outback has been more than a vehicle — it's a trusted companion for the lives people actually live. Three decades of refinement have made it the go-anywhere, do-anything partner for families, adventurers, and commuters alike. Built on a foundation of legendary Subaru reliability and Symmetrical AWD, the 2026 Outback earns your trust on every road, every season, every year.</p>
       <div class="hero-actions">
         <a href="#trims" class="btn-blue">
@@ -915,7 +1090,7 @@
         <div class="footer-top">
           <div class="footer-brand">
             <a href="#hero" style="display:inline-flex;">
-              <img src="Subaru-logo.avif" alt="Subaru" style="height:28px;width:auto;" />
+              <img src="Subaru-logo.avif" alt="Subaru Canada" style="height:28px;width:auto;" />
             </a>
             <p>Love. It's what makes a Subaru, a Subaru. Built for those who go further.</p>
           </div>
@@ -976,79 +1151,115 @@
 
 
   <script>
-    const nav         = document.getElementById('nav');
-    const videoBg     = document.getElementById('videoBg');
-    const videoClose  = document.getElementById('videoClose');
-    const heroSection = document.getElementById('hero');
+    // ─────────────────────────────────────────────────────────
+    // DOM REFERENCES
+    // Cached once at startup; never re-queried inside handlers.
+    // ─────────────────────────────────────────────────────────
+    const nav          = document.getElementById('nav');
+    const videoBg      = document.getElementById('videoBg');
+    const videoClose   = document.getElementById('videoClose');
+    const heroSection  = document.getElementById('hero');
     const trimsSection = document.getElementById('trims');
-    const heroContent = document.getElementById('heroContent');
-    const heroTitle   = heroContent.querySelector('.hero-title');
-    const heroEyebrow = heroContent.querySelector('.hero-eyebrow');
-    const heroSub     = heroContent.querySelector('.hero-sub');
-    const heroActions = heroContent.querySelector('.hero-actions');
-    const scrollHint  = heroSection.querySelector('.scroll-hint');
+    const heroContent  = document.getElementById('heroContent');
+    const heroTitle    = heroContent.querySelector('.hero-title');
+    const heroEyebrow  = heroContent.querySelector('.hero-eyebrow');
+    const heroSub      = heroContent.querySelector('.hero-sub');
+    const heroActions  = heroContent.querySelector('.hero-actions');
+    const scrollHint   = heroSection.querySelector('.scroll-hint');
 
+    // Tracks whether the video card is still visible.
+    // Set to false when the user clicks the close button.
     let videoVisible = true;
 
-    // ── Close button dismisses the card ──
+    // ─────────────────────────────────────────────────────────
+    // VIDEO CLOSE BUTTON
+    // Adds .hidden (opacity: 0, pointer-events: none) and
+    // prevents the collapse logic from re-showing it.
+    // ─────────────────────────────────────────────────────────
     videoClose.addEventListener('click', () => {
       videoBg.classList.add('hidden');
       videoVisible = false;
     });
 
+    // Utility: clamp a value between lo and hi (inclusive).
     function clamp(v, lo, hi) { return Math.min(Math.max(v, lo), hi); }
 
-    // ── Main scroll handler ──
+    // ─────────────────────────────────────────────────────────
+    // SCROLL HANDLER
+    // Called on every scroll event (passive — no preventDefault).
+    // Three responsibilities:
+    //   1. Nav frost effect
+    //   2. Hero text parallax / fade
+    //   3. Video card collapse
+    // ─────────────────────────────────────────────────────────
     function onScroll() {
-      const y = window.scrollY;
-      const heroH = heroSection.offsetHeight; // = 100vh
+      const y     = window.scrollY;
+      const heroH = heroSection.offsetHeight; // equals 100vh
 
-      // Nav frost
+      // 1. Nav — add frosted-glass background after 40 px of scroll.
       nav.classList.toggle('scrolled', y > 40);
 
-      // ── Hero text animation ──
-      // Animate over first 55% of hero height
+      // 2. Hero text parallax
+      // Progress goes from 0 → 1 over the first 55% of the hero height.
+      // Each element fades out at a different rate so they feel layered:
+      //   scrollHint (fastest) → eyebrow → sub/actions → title (slowest)
       const textProgress = clamp(y / (heroH * 0.55), 0, 1);
       if (textProgress > 0) {
-        const lift = textProgress * 65;
-        heroContent.style.transform  = `translateY(-${lift}px)`;
-        heroTitle.style.transform    = `scale(${1 + textProgress * 0.1})`;
+        const lift = textProgress * 65; // max 65 px upward shift
+        heroContent.style.transform     = `translateY(-${lift}px)`;
+        heroTitle.style.transform       = `scale(${1 + textProgress * 0.1})`;
         heroTitle.style.transformOrigin = 'left bottom';
-        heroTitle.style.opacity      = Math.max(0, 1 - textProgress * 1.8);
-        heroEyebrow.style.opacity    = Math.max(0, 1 - textProgress * 2.8);
-        heroSub.style.opacity        = Math.max(0, 1 - textProgress * 2.2);
-        heroActions.style.opacity    = Math.max(0, 1 - textProgress * 2.2);
-        scrollHint.style.opacity     = Math.max(0, 1 - textProgress * 3);
+        heroTitle.style.opacity         = Math.max(0, 1 - textProgress * 1.8);
+        heroEyebrow.style.opacity       = Math.max(0, 1 - textProgress * 2.8);
+        heroSub.style.opacity           = Math.max(0, 1 - textProgress * 2.2);
+        heroActions.style.opacity       = Math.max(0, 1 - textProgress * 2.2);
+        scrollHint.style.opacity        = Math.max(0, 1 - textProgress * 3);
       } else {
-        heroContent.style.transform  = '';
-        heroTitle.style.transform    = '';
+        // Reset all inline styles when back at the top so CSS takes over.
+        heroContent.style.transform     = '';
+        heroTitle.style.transform       = '';
         heroTitle.style.transformOrigin = '';
-        heroTitle.style.opacity      = '';
-        heroEyebrow.style.opacity    = '';
-        heroSub.style.opacity        = '';
-        heroActions.style.opacity    = '';
-        scrollHint.style.opacity     = '';
+        heroTitle.style.opacity         = '';
+        heroEyebrow.style.opacity       = '';
+        heroSub.style.opacity           = '';
+        heroActions.style.opacity       = '';
+        scrollHint.style.opacity        = '';
       }
 
-      // ── Video collapse ──
-      // Keep video full-screen through the overview + intro sections.
-      // Collapse only when the trims section is about to enter the viewport.
+      // 3. Video collapse
+      // The video stays full-screen while the user scrolls through the hero,
+      // overview stats, and intro sections. Once the trims section is 40% of
+      // a viewport-height away from entering the screen, the video clips down
+      // to the bottom-right corner card via the .collapsed CSS class.
+      // clip-path runs on the compositor (no layout/repaint, no flash).
       if (videoVisible) {
         const collapseAt = trimsSection.offsetTop - window.innerHeight * 0.4;
         videoBg.classList.toggle('collapsed', y >= collapseAt);
       }
     }
 
+    // Passive listener — browser can optimise scroll without waiting for JS.
     window.addEventListener('scroll', onScroll, { passive: true });
 
-    // ── Intersection Observer for reveal animations ──
+    // ─────────────────────────────────────────────────────────
+    // REVEAL ANIMATIONS (IntersectionObserver)
+    // Elements with class .reveal start as opacity:0 / translateY(24px).
+    // Once 10% of the element enters the viewport (with a 32px bottom
+    // margin so it triggers slightly before the element is fully visible),
+    // the .visible class is added, triggering the CSS transition.
+    // Use .reveal-delay-1/2/3 on siblings for a staggered entrance.
+    // ─────────────────────────────────────────────────────────
     const io = new IntersectionObserver((entries) => {
       entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
     }, { threshold: 0.1, rootMargin: '0px 0px -32px 0px' });
 
     document.querySelectorAll('.reveal').forEach(el => io.observe(el));
 
-    // ── Anchor smooth scroll ──
+    // ─────────────────────────────────────────────────────────
+    // SMOOTH SCROLL — in-page anchor links
+    // Overrides the default jump behaviour for all href="#…" anchors
+    // so the page scrolls smoothly to the target section.
+    // ─────────────────────────────────────────────────────────
     document.querySelectorAll('a[href^="#"]').forEach(a => {
       a.addEventListener('click', e => {
         const target = document.querySelector(a.getAttribute('href'));

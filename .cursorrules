@@ -1,0 +1,155 @@
+# Subaru Outback Landing Page — Cursor Rules
+
+## Project overview
+Single-file marketing landing page for the 2026 Subaru Outback.
+Stack: vanilla HTML5 + CSS (in `<style>`) + JS (in `<script>`), no build tools, no frameworks.
+Dev server: `npm run dev` (live-server on port 8000).
+
+---
+
+## File structure
+- `index.html` — the entire page (styles, markup, script)
+- `Subaru-logo.avif` — brand logo asset
+- `YTDown.com_YouTube_2026-Subaru-Outback-…_1080p.mp4` — hero background video
+- `package.json` — dev dependency (live-server only)
+
+Keep everything in one file. Do not split into separate CSS/JS files unless the user explicitly requests it.
+
+---
+
+## Design tokens (CSS custom properties — defined in `:root`)
+Always use these tokens; never hard-code raw colour values.
+
+| Token        | Value                   | Usage                         |
+|--------------|-------------------------|-------------------------------|
+| `--bg`       | `#080808`               | Page background               |
+| `--surface`  | `#111111`               | Card / section backgrounds    |
+| `--surface2` | `#161616`               | Alternate surface (EyeSight)  |
+| `--border`   | `rgba(255,255,255,0.08)`| Dividers, card borders        |
+| `--text`     | `#ffffff`               | Primary text                  |
+| `--muted`    | `rgba(255,255,255,0.5)` | Secondary / supporting text   |
+| `--blue`     | `#003087`               | Subaru brand blue (CTAs)      |
+| `--blue-lt`  | `#1A5FBF`               | Hover states, accents         |
+| `--amber`    | `#D4793B`               | Eyebrow labels, decorative    |
+| `--radius`   | `6px`                   | Default border-radius         |
+| `--card-w`   | `288px`                 | Collapsed video card width    |
+| `--card-h`   | `162px`                 | Collapsed video card height (16:9) |
+| `--card-gap` | `20px`                  | Collapsed video card margin   |
+
+---
+
+## Typography
+- Body font: `'Inter'` (weights 300–700) via Google Fonts
+- Display font: `'Inter Tight'` (weights 700–900) via Google Fonts — used for hero titles, section headings, spec numbers
+- Base size: `16px`; use `clamp()` for fluid heading sizes
+- Letter-spacing convention: `-0.03em` to `-0.04em` on large headings; `0.1–0.2em` on ALL-CAPS eyebrow labels
+
+---
+
+## Layout conventions
+- Max-width container: `1160px`, `.container` class, `padding: 0 48px`
+- Standard section padding: `110px 0` via `.section-pad`
+- Section backgrounds alternate: transparent/semi-transparent → `var(--surface)` → gradient → `var(--surface2)` → transparent (CTA) → `var(--surface)` (footer)
+- Two-column grids use `gap: 72–80px` and `align-items: center`
+
+---
+
+## Scroll animations
+
+### Reveal on scroll
+Apply `.reveal` to any element that should fade up into view.
+Use `.reveal-delay-1 / -2 / -3` for staggered children (delays 0.1s / 0.2s / 0.3s).
+The IntersectionObserver in the `<script>` block adds `.visible` when 10% of the element enters the viewport.
+Do NOT animate elements that are above the fold on load — they already have CSS `@keyframes fadeUp` animations.
+
+### Hero parallax
+The `onScroll()` handler animates hero text over the first 55% of the hero's height.
+Use the `clamp(v, lo, hi)` helper for all scroll-progress calculations.
+Hero text transforms are written as inline styles by JS — do not add CSS transitions to `.hero-content` children.
+
+### Video collapse
+The `.video-bg` element uses `clip-path` (runs on the compositor — no layout/repaint).
+It transitions from full-screen to a bottom-right card (`--card-w × --card-h`) when the trims section is 40% into the viewport.
+The white border frame (`.video-frame`) and close button (`.video-close`) are separate elements so `clip-path` doesn't clip them.
+
+---
+
+## JavaScript conventions
+- Vanilla JS only — no jQuery, no lodash, no external scripts
+- Scroll listener must use `{ passive: true }`
+- DOM queries at the top of the script block; no `document.getElementById` calls inside event handlers
+- Use `classList.toggle(className, condition)` over manual add/remove
+- Reset inline styles by setting to `''` (empty string), not `null` or `'none'`
+
+---
+
+## Accessibility
+- All images must have descriptive `alt` attributes
+- Interactive elements must have `aria-label` if they lack visible text (e.g. the video close button)
+- Maintain logical heading order: one `<h1>` in the hero, `<h2>` for section titles
+- All `<a>` buttons must have visible focus styles (browser default is acceptable)
+- Do not remove `outline` without a replacement focus indicator
+
+---
+
+## Performance
+- `will-change: clip-path` is set only on `.video-bg` — do not apply it broadly
+- The video uses `autoplay muted loop playsinline` — keep all four attributes
+- Google Fonts use `rel="preconnect"` — keep the preconnect links
+- Avoid adding new `@keyframes` animations — prefer CSS `transition` or scroll-driven JS
+
+---
+
+## Naming conventions
+- BEM-like class names: block (`hero`), element (`hero-title`), modifier (`hero-title--large`)
+  - Existing code uses flat names (`.hero-title`, not `.hero__title`) — keep that style
+- Section IDs match the nav `href` anchors: `#hero`, `#trims`, `#specs`, `#safety`, `#cta`
+- JS variable names: camelCase; DOM refs suffixed with the element type is optional but consistent (`videoBg`, `videoClose`, `heroContent`)
+
+---
+
+## SEO requirements
+Every change to the page must keep these in place:
+
+### `<head>` tags (never remove)
+| Tag | Purpose |
+|-----|---------|
+| `<meta name="description">` | ~155-char plain-text summary; must mention "2026 Subaru Outback" and a key differentiator |
+| `<link rel="canonical">` | Prevents duplicate-content penalties; update href to the live URL on deploy |
+| Open Graph (`og:*`) | Controls social-share card on Facebook/LinkedIn; `og:image` must be absolute URL to a 1200×630 image |
+| Twitter Card (`twitter:*`) | Controls social-share card on X/Twitter |
+| JSON-LD `<script type="application/ld+json">` | Structured data for Google rich results (price, vehicle specs); keep in sync with actual pricing |
+
+### Title tag rules
+- Format: `[Model year] [Make] [Model] — [Brand tagline]`
+- Max 60 characters
+- Current: `2026 Subaru Outback — 30 Years of Evolution` (43 chars ✓)
+
+### Heading hierarchy
+- Exactly **one** `<h1>` per page — in the hero
+- `<h1>` must contain "Subaru Outback" (currently via `.sr-only` prefix so visual design is unchanged)
+- Section headings use `<h2>`; footer column headings use `<h4>` (skipping h3 is acceptable here as they are navigation landmarks, not content headings)
+
+### Image `alt` text rules
+- All `<img>` elements must have a non-empty `alt` attribute
+- Logo alt: `"Subaru Canada"` (brand name + market)
+- Product images: describe what is shown, e.g. `"2026 Subaru Outback Wilderness in Solar Flare Pearl on a dirt trail"`
+- Decorative SVGs (car silhouette, EyeSight diagram): add `aria-hidden="true"` instead of alt text since they are inline
+
+### `.sr-only` class
+Used to inject keyword-rich text for SEO/accessibility without affecting the visual design.
+Currently applied to the h1 product name prefix: `<span class="sr-only">2026 Subaru Outback — </span>`
+Do not remove this pattern.
+
+### Pricing / structured data sync
+If trim prices change, update **both** the visible HTML (`.trim-price`) and the `offers` array in the JSON-LD block. They must match.
+
+---
+
+## What NOT to do
+- Do not introduce a JS framework (React, Vue, Alpine, etc.)
+- Do not add a CSS preprocessor or PostCSS pipeline
+- Do not split styles into a separate `.css` file unless the user asks
+- Do not use `!important` — increase specificity or restructure selectors instead
+- Do not add `position: fixed` elements with `z-index` values higher than 100 (nav) without updating the z-index table in comments
+- Do not commit the `node_modules/` directory
